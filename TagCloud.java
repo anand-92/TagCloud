@@ -1,4 +1,3 @@
-
 import java.util.Comparator;
 
 import components.map.Map;
@@ -57,7 +56,7 @@ public final class TagCloud {
         @Override
         public int compare(Map.Pair<String, Integer> o1,
                 Map.Pair<String, Integer> o2) {
-            return o1.value().compareTo(o2.value());
+            return o2.value().compareTo(o1.value());
         }
     }
 
@@ -337,7 +336,7 @@ public final class TagCloud {
 
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap = generateMapWithCount(fileIn);
-        out.print("LOOP");
+
         //generate a sorting machine sorted by count with the big map
         SortingMachine<Map.Pair<String, Integer>> countSorter = CountSortingMachine(
                 bigMap, countCompare);
