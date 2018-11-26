@@ -2,7 +2,6 @@ import java.util.Comparator;
 
 import components.map.Map;
 import components.map.Map1L;
-import components.queue.Queue;
 import components.set.Set;
 import components.set.Set1L;
 import components.simplereader.SimpleReader;
@@ -177,17 +176,35 @@ public final class TagCloud {
         return wordCountMap;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> GenerateSortingMachine(
-            Map<String, Integer> map, Comparator c) {
+    private static SortingMachine<Map.Pair<String, Integer>> CountSortingMachine(
+            Map<String, Integer> map, CountComparator c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
                 c);
+        Map<String, Integer> temp = map.newInstance();
         while (map.size() > 0) {
             Map.Pair<String, Integer> pair = map.removeAny();
             sorter.add(pair);
+            temp.add(pair.key(), pair.value());
         }
+        map.transferFrom(temp);
         return sorter;
     }
-    //THIS MIGHT NOT BE NEEDED
+
+    private static SortingMachine<Map.Pair<String, Integer>> AlphabeticSortingMachine(
+            Map<String, Integer> map, Alphabetize c) {
+        SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
+                c);
+        Map<String, Integer> temp = map.newInstance();
+        while (map.size() > 0) {
+            Map.Pair<String, Integer> pair = map.removeAny();
+            sorter.add(pair);
+            temp.add(pair.key(), pair.value());
+        }
+        map.transferFrom(temp);
+        return sorter;
+    }
+
+    //MIGHT NOT NEED THIS METHOD
     private static Map<String, Integer> generateShortenedMap(
             SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
         Map<String, Integer> map = new Map1L<String, Integer>();
@@ -224,7 +241,8 @@ public final class TagCloud {
         SimpleWriter out = new SimpleWriter1L();
         //prompt user for name of input file
         out.println("Input File: ");
-        SimpleReader fileIn = new SimpleReader1L(in.nextLine());
+        String fileName = in.nextLine();
+        SimpleReader fileIn = new SimpleReader1L(fileName);
         //prompt user for name of output file
         out.println("Output File: ");
         SimpleWriter fileOut = new SimpleWriter1L(in.nextLine());
@@ -233,9 +251,12 @@ public final class TagCloud {
         int n = in.nextInteger();
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap = generateMapWithCount(fileIn);
-        //declare sortingmachine that sorts based on word count
-        SortingMachine<Map.Pair<String, Integer>> countSorter = generateSortingMachine(
+        //declare two sorting machines that sort based on word count
+        SortingMachine<Map.Pair<String, Integer>> countSorter1 = CountSortingMachine(
                 bigMap, countCompare);
+        SortingMachine<Map.Pair<String, Integer>> countSorter2 = CountSortingMachine(
+                bigMap, countCompare);
+        //generate a map with n words, using up one of the sorting machines
 
         /*
          * Close input and output streams
