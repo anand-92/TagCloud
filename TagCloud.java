@@ -204,7 +204,6 @@ public final class TagCloud {
         return sorter;
     }
 
-    //MIGHT NOT NEED THIS METHOD
     private static Map<String, Integer> generateShortenedMap(
             SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
         Map<String, Integer> map = new Map1L<String, Integer>();
@@ -219,8 +218,8 @@ public final class TagCloud {
     }
 
     private static void outputTagCloud(SimpleWriter out,
-            SortingMachine<Map.Pair<String, Integer>> countSorted,
-            SortingMachine<Map.Pair<String, Integer>> alphSorted, int n) {
+            SortingMachine<Map.Pair<String, Integer>> countSorter,
+            SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n) {
         //TODO - output header
 
         //TODO - output tag-cloud in alphabetical order, with n words and the font size of each word corresponding to its relative count
@@ -236,27 +235,44 @@ public final class TagCloud {
         //declare comparator objects
         Alphabetize alphabetize = new Alphabetize();
         CountComparator countCompare = new CountComparator();
+
         //create console input and output streams
         SimpleReader in = new SimpleReader1L();
         SimpleWriter out = new SimpleWriter1L();
+
         //prompt user for name of input file
         out.println("Input File: ");
         String fileName = in.nextLine();
         SimpleReader fileIn = new SimpleReader1L(fileName);
+
         //prompt user for name of output file
         out.println("Output File: ");
         SimpleWriter fileOut = new SimpleWriter1L(in.nextLine());
+
         //prompt user for number of words in cloud tag
         out.println("Number of words in cloud tag: ");
         int n = in.nextInteger();
+
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap = generateMapWithCount(fileIn);
-        //declare two sorting machines that sort based on word count
+
+        //generate a sorting machine sorted by count with the big map
         SortingMachine<Map.Pair<String, Integer>> countSorter1 = CountSortingMachine(
                 bigMap, countCompare);
+
+        //generate a map with n words, using up the sorting machine
+        Map<String, Integer> smallMap = generateShortenedMap(countSorter1, n);
+
+        //generate another sorting machine sorted by count with the new map
         SortingMachine<Map.Pair<String, Integer>> countSorter2 = CountSortingMachine(
-                bigMap, countCompare);
-        //generate a map with n words, using up one of the sorting machines
+                smallMap, countCompare);
+
+        //generate a sorting machine sorted alphabetically with the new map
+        SortingMachine<Map.Pair<String, Integer>> alphaSorter = AlphabeticSortingMachine(
+                smallMap, alphabetize);
+
+        //output HTML code for the tag cloud to the output file
+        outputTagCloud(fileOut, countSorter2, alphaSorter, n);
 
         /*
          * Close input and output streams
