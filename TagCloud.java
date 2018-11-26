@@ -10,6 +10,7 @@ import components.simplewriter.SimpleWriter;
 import components.simplewriter.SimpleWriter1L;
 import components.sortingmachine.SortingMachine;
 import components.sortingmachine.SortingMachine1L;
+import components.utilities.Reporter;
 
 /**
  * Put a short phrase describing the program here.
@@ -176,7 +177,7 @@ public final class TagCloud {
         return wordCountMap;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> CountSortingMachine(
+    private static SortingMachine<Map.Pair<String, Integer>> countSortingMachine(
             Map<String, Integer> map, CountComparator c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
                 c);
@@ -190,7 +191,7 @@ public final class TagCloud {
         return sorter;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> AlphabeticSortingMachine(
+    private static SortingMachine<Map.Pair<String, Integer>> alphabeticSortingMachine(
             Map<String, Integer> map, Alphabetize c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
                 c);
@@ -256,19 +257,26 @@ public final class TagCloud {
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap = generateMapWithCount(fileIn);
 
+        //check for user error on the value of n
+        boolean a = n >= 0;
+        Reporter.assertElseFatalError(a, "Error: n is a negative number.");
+        boolean b = n <= bigMap.size();
+        Reporter.assertElseFatalError(b,
+                "Error: n is larger than the number of words in the file.");
+
         //generate a sorting machine sorted by count with the big map
-        SortingMachine<Map.Pair<String, Integer>> countSorter1 = CountSortingMachine(
+        SortingMachine<Map.Pair<String, Integer>> countSorter1 = countSortingMachine(
                 bigMap, countCompare);
 
         //generate a map with n words, using up the sorting machine
         Map<String, Integer> smallMap = generateShortenedMap(countSorter1, n);
 
         //generate another sorting machine sorted by count with the new map
-        SortingMachine<Map.Pair<String, Integer>> countSorter2 = CountSortingMachine(
+        SortingMachine<Map.Pair<String, Integer>> countSorter2 = countSortingMachine(
                 smallMap, countCompare);
 
         //generate a sorting machine sorted alphabetically with the new map
-        SortingMachine<Map.Pair<String, Integer>> alphaSorter = AlphabeticSortingMachine(
+        SortingMachine<Map.Pair<String, Integer>> alphaSorter = alphabeticSortingMachine(
                 smallMap, alphabetize);
 
         //output HTML code for the tag cloud to the output file
