@@ -203,7 +203,7 @@ public final class TagCloud {
 
     private static void outputTagCloud(SimpleWriter out,
             SortingMachine<Map.Pair<String, Integer>> countSorted,
-            Queue<String> alphabeticSorted, int n) {
+            SortingMachine<Map.Pair<String, Integer>> alphSorted, int n) {
         //TODO - output header
 
         //TODO - output tag-cloud in alphabetical order, with n words and the font size of each word corresponding to its relative count
