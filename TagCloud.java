@@ -187,7 +187,7 @@ public final class TagCloud {
         }
         return sorter;
     }
-
+    //THIS MIGHT NOT BE NEEDED
     private static Map<String, Integer> generateShortenedMap(
             SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
         Map<String, Integer> map = new Map1L<String, Integer>();
