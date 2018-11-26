@@ -10,6 +10,7 @@ import components.simplereader.SimpleReader1L;
 import components.simplewriter.SimpleWriter;
 import components.simplewriter.SimpleWriter1L;
 import components.sortingmachine.SortingMachine;
+import components.sortingmachine.SortingMachine1L;
 
 /**
  * Put a short phrase describing the program here.
@@ -135,7 +136,7 @@ public final class TagCloud {
     /**
      * Put a short phrase describing the static method myMethod here.
      */
-    private static Map<String, Integer> generateWordCountMap(SimpleReader in) {
+    private static Map<String, Integer> generateMapWithCount(SimpleReader in) {
         //Create set of separators
         Set<Character> separators = new Set1L<>();
         separators.add(' ');
@@ -176,14 +177,28 @@ public final class TagCloud {
         return wordCountMap;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> SortingMachineByCount(
-            Map<String, Integer> map, int n, Comparator C) {
-        return null;
+    private static SortingMachine<Map.Pair<String, Integer>> GenerateSortingMachine(
+            Map<String, Integer> map, Comparator c) {
+        SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
+                c);
+        while (map.size() > 0) {
+            Map.Pair<String, Integer> pair = map.removeAny();
+            sorter.add(pair);
+        }
+        return sorter;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> SortingMachineByAlphabet(
-            Map<String, Integer> map, Comparator C) {
-        return null;
+    private static Map<String, Integer> generateShortenedMap(
+            SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
+        Map<String, Integer> map = new Map1L<String, Integer>();
+        sorter.changeToExtractionMode();
+        int i = 0;
+        while (i < n) {
+            Map.Pair<String, Integer> pair = sorter.removeFirst();
+            map.add(pair.key(), pair.value());
+            i++;
+        }
+        return map;
     }
 
     private static void outputTagCloud(SimpleWriter out,
@@ -201,14 +216,34 @@ public final class TagCloud {
      *            the command line arguments
      */
     public static void main(String[] args) {
+        //declare comparator objects
+        Alphabetize alphabetize = new Alphabetize();
+        CountComparator countCompare = new CountComparator();
+        //create console input and output streams
         SimpleReader in = new SimpleReader1L();
         SimpleWriter out = new SimpleWriter1L();
+        //prompt user for name of input file
+        out.println("Input File: ");
+        SimpleReader fileIn = new SimpleReader1L(in.nextLine());
+        //prompt user for name of output file
+        out.println("Output File: ");
+        SimpleWriter fileOut = new SimpleWriter1L(in.nextLine());
+        //prompt user for number of words in cloud tag
+        out.println("Number of words in cloud tag: ");
+        int n = in.nextInteger();
+        //generate map of all terms and their respective counts from input file
+        Map<String, Integer> bigMap = generateMapWithCount(fileIn);
+        //declare sortingmachine that sorts based on word count
+        SortingMachine<Map.Pair<String, Integer>> countSorter = generateSortingMachine(
+                bigMap, countCompare);
 
         /*
          * Close input and output streams
          */
         in.close();
         out.close();
+        fileIn.close();
+        fileOut.close();
     }
 
 }
