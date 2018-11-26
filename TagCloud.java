@@ -276,8 +276,7 @@ public final class TagCloud {
     }
 
     private static void outputTagCloud(SimpleWriter out,
-            SortingMachine<Map.Pair<String, Integer>> countSorted,
-            SortingMachine<Map.Pair<String, Integer>> alphSorted, int n,
+            SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
             String fileName) {
         //TODO - output header
         out.println("<html>");
@@ -292,9 +291,9 @@ public final class TagCloud {
         out.println("<body>");
         out.println("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
         out.println("<div class = \"cdiv\"> <p class =\"cbox\">");
-
-        while (alphSorted.size() != 0) {
-            Map.Pair<String, Integer> pair = alphSorted.removeFirst();
+        alphaSorter.changeToExtractionMode();
+        while (alphaSorter.size() != 0) {
+            Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
             int font = (37) * (pair.value() - Min);
             font /= Max - Min;
             font += 11;
@@ -340,15 +339,11 @@ public final class TagCloud {
         Map<String, Integer> bigMap = generateMapWithCount(fileIn);
         out.print("LOOP");
         //generate a sorting machine sorted by count with the big map
-        SortingMachine<Map.Pair<String, Integer>> countSorter1 = CountSortingMachine(
+        SortingMachine<Map.Pair<String, Integer>> countSorter = CountSortingMachine(
                 bigMap, countCompare);
 
         //generate a map with n words, using up the sorting machine
-        Map<String, Integer> smallMap = generateShortenedMap(countSorter1, n);
-
-        //generate another sorting machine sorted by count with the new map
-        SortingMachine<Map.Pair<String, Integer>> countSorter2 = CountSortingMachine(
-                smallMap, countCompare);
+        Map<String, Integer> smallMap = generateShortenedMap(countSorter, n);
 
         //generate a sorting machine sorted alphabetically with the new map
         SortingMachine<Map.Pair<String, Integer>> alphaSorter = AlphabeticSortingMachine(
@@ -356,7 +351,7 @@ public final class TagCloud {
 
         //output HTML code for the tag cloud to the output file
 
-        outputTagCloud(fileOut, countSorter2, alphaSorter, n, fileName);
+        outputTagCloud(fileOut, alphaSorter, n, fileName);
 
         /*
          * Close input and output streams
