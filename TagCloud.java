@@ -28,7 +28,7 @@ public final class TagCloud {
 
     /**
      * A {@code Comparator}) class that compares Map.Pair<String, Integer> using
-     * the {@code compareTo(String)}) java.util method.
+     * the {@code compareTo(String)}) java.util method to compare keys.
      *
      * @author Hudson Arledge and Nik Anand
      *
@@ -44,7 +44,7 @@ public final class TagCloud {
 
     /**
      * A {@code Comparator}) class that compares Map.Pair<String, Integer> using
-     * the {@code compareTo(Integer)}) java.util method.
+     * the {@code compareTo(Integer)}) java.util method to compare values.
      *
      * @author Hudson Arledge and Nik Anand
      *
@@ -134,7 +134,17 @@ public final class TagCloud {
     }
 
     /**
-     * Put a short phrase describing the static method myMethod here.
+     * Generates a {@code Map<String, Integer>} containing each word in the text
+     * file {@code in} as keys and their number of occurrences in {@code in} as
+     * values.
+     *
+     * @param in
+     *            the input text file from which the map is generated
+     * @return a {@code Map<String, Integer>} containing each word in {@code in}
+     *         as keys and their number of occurrences in {@code in} as values
+     * @ensures [the returned map contains all the words in the input file as
+     *          keys, and each key's value is the number of times that key
+     *          appears in the text file]
      */
     private static Map<String, Integer> generateMapWithCount(SimpleReader in) {
         //Create set of separators
@@ -147,6 +157,30 @@ public final class TagCloud {
         separators.add('!');
         separators.add('?');
         separators.add('_');
+        separators.add('\'');
+        separators.add('\"');
+        separators.add('`');
+        separators.add('*');
+        separators.add('(');
+        separators.add(')');
+        separators.add('[');
+        separators.add(']');
+        separators.add('{');
+        separators.add('}');
+        separators.add('\\');
+        separators.add('|');
+        separators.add('<');
+        separators.add('>');
+        separators.add('~');
+        separators.add('^');
+        separators.add('@');
+        separators.add('#');
+        separators.add('$');
+        separators.add('&');
+        separators.add('+');
+        separators.add('=');
+        separators.add(';');
+        separators.add(':');
         //declare map to be generated
         Map<String, Integer> wordCountMap = new Map1L<String, Integer>();
         //generate map
@@ -160,7 +194,19 @@ public final class TagCloud {
                 if (key.contains(" ") || key.contains(",") || key.contains("/")
                         || key.contains(".") || key.contains("-")
                         || key.contains("!") || key.contains("?")
-                        || key.contains("_")) {
+                        || key.contains("_") || key.contains("\'")
+                        || key.contains("\"") || key.contains("`")
+                        || key.contains("*") || key.contains("(")
+                        || key.contains(")") || key.contains("[")
+                        || key.contains("]") || key.contains("{")
+                        || key.contains("}") || key.contains("\\")
+                        || key.contains("|") || key.contains("<")
+                        || key.contains(">") || key.contains("~")
+                        || key.contains("^") || key.contains("@")
+                        || key.contains("#") || key.contains("$")
+                        || key.contains("&") || key.contains("+")
+                        || key.contains("=") || key.contains(";")
+                        || key.contains(":")) {
                     i += key.length();
                 } else {
                     //store all non-separators and their respective counts in
@@ -171,12 +217,16 @@ public final class TagCloud {
                     } else {
                         wordCountMap.add(key, 1);
                     }
+                    i += key.length();
                 }
             }
         }
         return wordCountMap;
     }
 
+    /**
+     * Put a short phrase describing the static method myMethod here.
+     */
     private static SortingMachine<Map.Pair<String, Integer>> countSortingMachine(
             Map<String, Integer> map, CountComparator c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
@@ -191,6 +241,9 @@ public final class TagCloud {
         return sorter;
     }
 
+    /**
+     * Put a short phrase describing the static method myMethod here.
+     */
     private static SortingMachine<Map.Pair<String, Integer>> alphabeticSortingMachine(
             Map<String, Integer> map, Alphabetize c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
@@ -205,6 +258,9 @@ public final class TagCloud {
         return sorter;
     }
 
+    /**
+     * Put a short phrase describing the static method myMethod here.
+     */
     private static Map<String, Integer> generateShortenedMap(
             SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
         Map<String, Integer> map = new Map1L<String, Integer>();
@@ -218,6 +274,9 @@ public final class TagCloud {
         return map;
     }
 
+    /**
+     * Put a short phrase describing the static method myMethod here.
+     */
     private static void outputTagCloud(SimpleWriter out,
             SortingMachine<Map.Pair<String, Integer>> countSorter,
             SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n) {
