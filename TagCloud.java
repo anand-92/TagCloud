@@ -279,22 +279,22 @@ public final class TagCloud {
             String fileName) {
         //TODO - output header
         out.println("<html>");
-        out.println("<head> <title> Top " + n + "words in " + fileName
+        out.println("<head> " + "<title> Top " + n + "words in " + fileName
                 + "</title>");
         out.println(
-                "<link href=\"tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">");
+                "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">");
         out.println("</head>");
 
         //TODO - output tag-cloud in alphabetical order, with n words and the font size of each word corresponding to its relative count
 
-        out.println("<body>");
+        out.println("<body data-gr-c-s-loaded=\"true\">");
         out.println("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
-        out.println("<div class = \"cdiv\"> <p class =\"cbox\">");
+        out.println("<div class = \"cdiv\"> " + "<p class =\"cbox\">");
         alphaSorter.changeToExtractionMode();
         while (alphaSorter.size() != 0) {
             Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
             int font = (37) * (pair.value() - Min);
-            font /= Max - Min;
+            font /= (Max - Min);
             font += 11;
             out.println("<span style=\"cursor:default\" class=\"f" + font + "\""
                     + " title=\"count: " + pair.value() + "\">" + pair.key()
