@@ -149,7 +149,8 @@ public final class TagCloud {
      *          keys, and each key's value is the number of times that key
      *          appears in the text file]
      */
-    private static Map<String, Integer> generateMapWithCount(SimpleReader in) {
+    private static Map<String, Integer> generateMapWithCount(SimpleReader in,
+            int n) {
         //Create set of separators
         Set<Character> separators = new Set1L<>();
         separators.add(' ');
@@ -187,6 +188,7 @@ public final class TagCloud {
         //declare map to be generated
         Map<String, Integer> wordCountMap = new Map1L<String, Integer>();
         //generate map
+        int count = 0;
         while (!in.atEOS()) {
             String text = in.nextLine().toLowerCase();
             int i = 0;
@@ -215,14 +217,21 @@ public final class TagCloud {
                     //store all non-separators and their respective counts in
                     //the map
                     if (wordCountMap.hasKey(key)) {
-                        int count = wordCountMap.value(key) + 1;
-                        wordCountMap.replaceValue(key, count);
+                        int value = wordCountMap.value(key) + 1;
+                        wordCountMap.replaceValue(key, value);
                     } else {
                         wordCountMap.add(key, 1);
                     }
                     i += key.length();
+                    count++;
                 }
             }
+        }
+        //print error message if n is too big
+        if (count < n) {
+            SimpleWriter out = new SimpleWriter1L();
+            out.println(
+                    "Error: n is larger than the number of words in the file");
         }
         return wordCountMap;
     }
@@ -273,25 +282,12 @@ public final class TagCloud {
         }
         return map;
     }
-    /**
-     * Outputs to a given file {@code out} html code that prints words from 
-     * {@code alphaSorter} in order, adjusting the word's font size based on
-     * occurences.  
-     *
-     * @param out
-     *            the output text file 
-     * @param alphaSorter
-     *            an alphabetically sorted map of words with counts
-     * @param n
-     *            the given number of words in cloud tag
-     * @param fileName
-     *            the name of the given input file
-     * @ensures that a valid html file is generated to the given output filename
-     */
+
     private static void outputTagCloud(SimpleWriter out,
             SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
             String fileName) {
-        //TODO - output header
+
+        //output header
         out.println("<html>");
         out.println("<head> " + "<title> Top " + n + "words in " + fileName
                 + "</title>");
@@ -299,8 +295,7 @@ public final class TagCloud {
                 "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">");
         out.println("</head>");
 
-        //TODO - output tag-cloud in alphabetical order, with n words and the font size of each word corresponding to its relative count
-
+        //output tag cloud
         out.println("<body data-gr-c-s-loaded=\"true\">");
         out.println("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
         out.println("<div class = \"cdiv\"> " + "<p class =\"cbox\">");
@@ -346,25 +341,35 @@ public final class TagCloud {
 
         //prompt user for number of words in cloud tag
         out.println("Number of words in cloud tag: ");
+        //note that this will report an error if the user does not enter an integer
         int n = in.nextInteger();
 
         //generate map of all terms and their respective counts from input file
-        Map<String, Integer> bigMap = generateMapWithCount(fileIn);
+        Map<String, Integer> bigMap = generateMapWithCount(fileIn, n);
 
-        //generate a sorting machine sorted by count with the big map
-        SortingMachine<Map.Pair<String, Integer>> countSorter = CountSortingMachine(
-                bigMap, countCompare);
+        //check for user error for the value of n
+        boolean a = n >= 0;
+        if (!a) {
+            out.println("Error: n is negative.");
+        } else {
 
-        //generate a map with n words, using up the sorting machine
-        Map<String, Integer> smallMap = generateShortenedMap(countSorter, n);
+            //generate a sorting machine sorted by count with the big map
+            SortingMachine<Map.Pair<String, Integer>> countSorter = CountSortingMachine(
+                    bigMap, countCompare);
 
-        //generate a sorting machine sorted alphabetically with the new map
-        SortingMachine<Map.Pair<String, Integer>> alphaSorter = AlphabeticSortingMachine(
-                smallMap, alphabetize);
+            //generate a map with n words, using up the sorting machine
+            Map<String, Integer> smallMap = bigMap.newInstance();
+            if (bigMap.size() > 0) {
+                smallMap = generateShortenedMap(countSorter, n);
+            }
 
-        //output HTML code for the tag cloud to the output file
+            //generate a sorting machine sorted alphabetically with the new map
+            SortingMachine<Map.Pair<String, Integer>> aSorter = AlphabeticSortingMachine(
+                    smallMap, alphabetize);
 
-        outputTagCloud(fileOut, alphaSorter, n, fileName);
+            //output HTML code for the tag cloud to the output file
+            outputTagCloud(fileOut, aSorter, n, fileName);
+        }
 
         /*
          * Close input and output streams
