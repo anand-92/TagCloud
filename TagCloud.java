@@ -273,7 +273,21 @@ public final class TagCloud {
         }
         return map;
     }
-
+    /**
+     * Outputs to a given file {@code out} html code that prints words from 
+     * {@code alphaSorter} in order, adjusting the word's font size based on
+     * occurences.  
+     *
+     * @param out
+     *            the output text file 
+     * @param alphaSorter
+     *            an alphabetically sorted map of words with counts
+     * @param n
+     *            the given number of words in cloud tag
+     * @param fileName
+     *            the name of the given input file
+     * @ensures that a valid html file is generated to the given output filename
+     */
     private static void outputTagCloud(SimpleWriter out,
             SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
             String fileName) {
