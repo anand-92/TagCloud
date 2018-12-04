@@ -442,8 +442,8 @@ public final class TagCloud {
         try {
             bufferedWriter.write("</p> </div> <body> </html>");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error writing to file");
+            return;
         }
     }
 
