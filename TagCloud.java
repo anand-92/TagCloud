@@ -206,43 +206,48 @@ public final class TagCloud {
         //generate map
         int count = 0;
 
-        while (bufferedReader.ready()) {
-            String text = bufferedReader.readLine().toLowerCase();
-            int i = 0;
-            //read each word or separator in the line, and store any non-separators
-            //in the queue.
-            while (i < text.length()) {
-                String key = nextWordOrSeparator(text, i, separators);
-                if (key.contains(" ") || key.contains(",") || key.contains("/")
-                        || key.contains(".") || key.contains("-")
-                        || key.contains("!") || key.contains("?")
-                        || key.contains("_") || key.contains("\'")
-                        || key.contains("\"") || key.contains("`")
-                        || key.contains("*") || key.contains("(")
-                        || key.contains(")") || key.contains("[")
-                        || key.contains("]") || key.contains("{")
-                        || key.contains("}") || key.contains("\\")
-                        || key.contains("|") || key.contains("<")
-                        || key.contains(">") || key.contains("~")
-                        || key.contains("^") || key.contains("@")
-                        || key.contains("#") || key.contains("$")
-                        || key.contains("&") || key.contains("+")
-                        || key.contains("=") || key.contains(";")
-                        || key.contains(":")) {
-                    i += key.length();
-                } else {
-                    //store all non-separators and their respective counts in
-                    //the map
-                    if (wordCountMap.containsKey(key)) {
-                        int value = wordCountMap.get(key) + 1;
-                        wordCountMap.replace(key, value);
+        try {
+            while (bufferedReader.ready()) {
+                String text = bufferedReader.readLine().toLowerCase();
+                int i = 0;
+                //read each word or separator in the line, and store any non-separators
+                //in the queue.
+                while (i < text.length()) {
+                    String key = nextWordOrSeparator(text, i, separators);
+                    if (key.contains(" ") || key.contains(",")
+                            || key.contains("/") || key.contains(".")
+                            || key.contains("-") || key.contains("!")
+                            || key.contains("?") || key.contains("_")
+                            || key.contains("\'") || key.contains("\"")
+                            || key.contains("`") || key.contains("*")
+                            || key.contains("(") || key.contains(")")
+                            || key.contains("[") || key.contains("]")
+                            || key.contains("{") || key.contains("}")
+                            || key.contains("\\") || key.contains("|")
+                            || key.contains("<") || key.contains(">")
+                            || key.contains("~") || key.contains("^")
+                            || key.contains("@") || key.contains("#")
+                            || key.contains("$") || key.contains("&")
+                            || key.contains("+") || key.contains("=")
+                            || key.contains(";") || key.contains(":")) {
+                        i += key.length();
                     } else {
-                        wordCountMap.put(key, 1);
+                        //store all non-separators and their respective counts in
+                        //the map
+                        if (wordCountMap.hasKey(key)) {
+                            int value = wordCountMap.value(key) + 1;
+                            wordCountMap.replaceValue(key, value);
+                        } else {
+                            wordCountMap.add(key, 1);
+                        }
+                        i += key.length();
+                        count++;
                     }
-                    i += key.length();
-                    count++;
                 }
             }
+        } catch (IOException e) {
+            System.err.println("Error reading file");
+            return null;
         }
         //print error message if n is too big
         if (count < n) {
@@ -500,27 +505,14 @@ public final class TagCloud {
 
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap;
-        try {
-            bigMap = generateMapWithCount(bufferedReader, n);
-        } catch (IOException e) {
-            System.err.println("Error reading file");
+        
+        bigMap = generateMapWithCount(bufferedReader, n);
+        if (bigMap == null) {
             scanner.close();
             try {
-                bufferedReader.close();
-            } catch (IOException e1) {
-                System.err.println("Error closing input file");
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e2) {
-                    System.err.println("Error closing new file");
-                    return;
-                }
-                return;
-            }
-            try {
                 bufferedWriter.close();
-            } catch (IOException e1) {
-                System.err.println("Error closing new file");
+            } catch (IOException e) {
+                System.err.println("Error closing file");
                 return;
             }
             return;
