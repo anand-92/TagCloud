@@ -399,12 +399,14 @@ public final class TagCloud {
         bufferedWriter.write("</p> </div> <body> </html>");
     }
 
-    /**
+     /**
      * Main method.
      *
      * @param args
      *            the command line arguments
      * @throws IOException
+     *             error opening or creating file
+     *
      */
     public static void main(String[] args) throws IOException {
         //declare comparator objects
@@ -418,14 +420,29 @@ public final class TagCloud {
         System.out.println("Input File: ");
         String fileName = scanner.nextLine();
 
-        FileReader reader = new FileReader(fileName);
-        BufferedReader bufferedReader = new BufferedReader(reader);
+        BufferedReader bufferedReader = null;
+
+        try {
+            bufferedReader = new BufferedReader(new FileReader(fileName));
+        } catch (FileNotFoundException e) {
+            System.err.println("Error opening file");
+            scanner.close();
+            return;
+        }
 
         //prompt user for name of output file
         System.out.println("Output File: ");
         String fileNameOut = scanner.nextLine();
-        FileWriter writer = new FileWriter(fileNameOut);
-        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+
+        BufferedWriter bufferedWriter = null;
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(fileNameOut));
+        } catch (IOException e) {
+            System.err.println("Error creating file");
+            scanner.close();
+            bufferedReader.close();
+            return;
+        }
 
         //prompt user for number of words in cloud tag
         System.out.println("Number of words in cloud tag: ");
@@ -462,11 +479,9 @@ public final class TagCloud {
         /*
          * Close input and output streams
          */
-        reader.close();
+
         bufferedReader.close();
         bufferedWriter.close();
-        writer.close();
-
         scanner.close();
     }
 
