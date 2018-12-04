@@ -1,19 +1,15 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Scanner;
 
 import components.map.Map;
 import components.map.Map1L;
 import components.set.Set;
 import components.set.Set1L;
-import components.simplereader.SimpleReader;
-import components.simplereader.SimpleReader1L;
-import components.simplewriter.SimpleWriter;
-import components.simplewriter.SimpleWriter1L;
 import components.sortingmachine.SortingMachine;
 import components.sortingmachine.SortingMachine1L;
 
@@ -163,14 +159,14 @@ public final class TagCloud {
      *            the number of words in the cloud tag as specified by the user
      * @return a {@code Map<String, Integer>} containing each word in {@code in}
      *         as keys and their number of occurrences in {@code in} as values
-     * @throws IOException 
+     * @throws IOException
      * @ensures [the returned map contains all the words in the input file as
      *          keys, and each key's value is the number of times that key
      *          appears in the text file] and [n is not larger than the number
      *          of words in the file]
      */
-    private static Map<String, Integer> generateMapWithCount(BufferedReader bufferedReader,
-            int n) throws IOException {
+    private static Map<String, Integer> generateMapWithCount(
+            BufferedReader bufferedReader, int n) throws IOException {
         //Create set of separators
         Set<Character> separators = new Set1L<>();
         separators.add(' ');
@@ -209,7 +205,8 @@ public final class TagCloud {
         Map<String, Integer> wordCountMap = new Map1L<String, Integer>();
         //generate map
         int count = 0;
-        while (bufferedReader.readLine()!=null) {
+
+        while (bufferedReader.ready()) {
             String text = bufferedReader.readLine().toLowerCase();
             int i = 0;
             //read each word or separator in the line, and store any non-separators
@@ -249,10 +246,8 @@ public final class TagCloud {
         }
         //print error message if n is too big
         if (count < n) {
-            SimpleWriter out = new SimpleWriter1L();
-            out.println(
+            System.out.println(
                     "Error: n is larger than the number of words in the file");
-            out.close();
         }
         return wordCountMap;
     }
@@ -363,7 +358,7 @@ public final class TagCloud {
      *            the given number of words in cloud tag
      * @param fileName
      *            the name of the given input file
-     * @throws IOException 
+     * @throws IOException
      * @requires alphaSorter is in insertion mode
      * @updates alphaSorter
      * @ensures [a valid html file is generated to the given output filename]
@@ -374,17 +369,19 @@ public final class TagCloud {
             String fileName) throws IOException {
 
         //output header
-        bufferedWriter.write("<html>");
-        bufferedWriter.write("<head> " + "<title> Top " + n + "words in " + fileName
-                + "</title>");
+        bufferedWriter.write("<html> \n");
+        bufferedWriter.write("<head> " + "<title> Top " + n + "words in "
+                + fileName + "</title>\n");
         bufferedWriter.write(
-                "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">");
-        bufferedWriter.write("</head>");
+                "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        bufferedWriter.write("</head>\n");
 
         //output tag cloud
-        bufferedWriter.write("<body data-gr-c-s-loaded=\"true\">");
-        bufferedWriter.write("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
-        bufferedWriter.write("<div class = \"cdiv\"> " + "<p class =\"cbox\">");
+        bufferedWriter.write("<body data-gr-c-s-loaded=\"true\">\n");
+        bufferedWriter.write(
+                "<h2>Top " + n + " words in " + fileName + "</h2><hr>\n");
+        bufferedWriter
+                .write("<div class = \"cdiv\"> " + "<p class =\"cbox\">\n");
         alphaSorter.changeToExtractionMode();
         while (alphaSorter.size() != 0) {
             Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
@@ -393,9 +390,9 @@ public final class TagCloud {
             font /= (max - min);
             final int b = 11;
             font += b;
-            bufferedWriter.write("<span style=\"cursor:default\" class=\"f" + font + "\""
-                    + " title=\"count: " + pair.value() + "\">" + pair.key()
-                    + "</span>");
+            bufferedWriter.write("<span style=\"cursor:default\" class=\"f"
+                    + font + "\"" + " title=\"count: " + pair.value() + "\">"
+                    + pair.key() + "</span>\n");
 
         }
 
@@ -407,7 +404,7 @@ public final class TagCloud {
      *
      * @param args
      *            the command line arguments
-     * @throws IOException 
+     * @throws IOException
      */
     public static void main(String[] args) throws IOException {
         //declare comparator objects
@@ -415,27 +412,25 @@ public final class TagCloud {
         CountComparator countCompare = new CountComparator();
 
         //create console input and output streams
-        SimpleReader in = new SimpleReader1L();
-        SimpleWriter out = new SimpleWriter1L();
+        Scanner scanner = new Scanner(System.in);
 
         //prompt user for name of input file
-        out.println("Input File: ");
-        String fileName = in.nextLine();
-        
+        System.out.println("Input File: ");
+        String fileName = scanner.nextLine();
+
         FileReader reader = new FileReader(fileName);
         BufferedReader bufferedReader = new BufferedReader(reader);
 
-
         //prompt user for name of output file
-        out.println("Output File: ");
-        String fileNameOut = in.nextLine();
+        System.out.println("Output File: ");
+        String fileNameOut = scanner.nextLine();
         FileWriter writer = new FileWriter(fileNameOut);
         BufferedWriter bufferedWriter = new BufferedWriter(writer);
 
         //prompt user for number of words in cloud tag
-        out.println("Number of words in cloud tag: ");
+        System.out.println("Number of words in cloud tag: ");
         //note that this will report an error if the user does not enter an integer
-        int n = in.nextInteger();
+        int n = scanner.nextInt();
 
         //generate map of all terms and their respective counts from input file
         Map<String, Integer> bigMap = generateMapWithCount(bufferedReader, n);
@@ -443,7 +438,7 @@ public final class TagCloud {
         //check for user error for the value of n
         boolean a = n >= 0;
         if (!a) {
-            out.println("Error: n is negative.");
+            System.out.println("Error: n is negative.");
         } else {
 
             //generate a sorting machine sorted by count with the big map
@@ -467,12 +462,12 @@ public final class TagCloud {
         /*
          * Close input and output streams
          */
-        in.close();
-        out.close();
         reader.close();
         bufferedReader.close();
-        writer.close();
         bufferedWriter.close();
+        writer.close();
+
+        scanner.close();
     }
 
 }
