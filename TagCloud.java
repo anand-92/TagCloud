@@ -358,8 +358,6 @@ public final class TagCloud {
      *            the given number of words in cloud tag
      * @param fileName
      *            the name of the given input file
-     * @throws IOException
-     *             error writing to file
      * @requires alphaSorter is in insertion mode
      * @updates alphaSorter
      * @ensures [a valid html file is generated to the given output filename]
