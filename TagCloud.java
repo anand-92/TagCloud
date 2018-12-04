@@ -359,6 +359,7 @@ public final class TagCloud {
      * @param fileName
      *            the name of the given input file
      * @throws IOException
+     *             error writing to file
      * @requires alphaSorter is in insertion mode
      * @updates alphaSorter
      * @ensures [a valid html file is generated to the given output filename]
@@ -366,22 +367,59 @@ public final class TagCloud {
      */
     private static void outputTagCloud(BufferedWriter bufferedWriter,
             SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
-            String fileName) throws IOException {
+            String fileName) {
 
         //output header
-        bufferedWriter.write("<html> \n");
-        bufferedWriter.write("<head> " + "<title> Top " + n + "words in "
-                + fileName + "</title>\n");
-        bufferedWriter.write(
-                "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">\n");
-        bufferedWriter.write("</head>\n");
+        try {
+            bufferedWriter.write("<html> \n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        try {
+            bufferedWriter.write("<head> " + "<title> Top " + n + "words in "
+                    + fileName + "</title>\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        try {
+            bufferedWriter.write(
+                    "<link href=\"http://cse.osu.edu/software/2231/web-sw2/"
+                            + "assignments/projects/tag-cloud-generator/data/"
+                            + "tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        try {
+            bufferedWriter.write("</head>\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
 
         //output tag cloud
-        bufferedWriter.write("<body data-gr-c-s-loaded=\"true\">\n");
-        bufferedWriter.write(
-                "<h2>Top " + n + " words in " + fileName + "</h2><hr>\n");
-        bufferedWriter
-                .write("<div class = \"cdiv\"> " + "<p class =\"cbox\">\n");
+        try {
+            bufferedWriter.write("<body data-gr-c-s-loaded=\"true\">\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        try {
+            bufferedWriter.write(
+                    "<h2>Top " + n + " words in " + fileName + "</h2><hr>\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        try {
+            bufferedWriter
+                    .write("<div class = \"cdiv\"> " + "<p class =\"cbox\">\n");
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
         alphaSorter.changeToExtractionMode();
         while (alphaSorter.size() != 0) {
             Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
@@ -390,13 +428,23 @@ public final class TagCloud {
             font /= (max - min);
             final int b = 11;
             font += b;
-            bufferedWriter.write("<span style=\"cursor:default\" class=\"f"
-                    + font + "\"" + " title=\"count: " + pair.value() + "\">"
-                    + pair.key() + "</span>\n");
+            try {
+                bufferedWriter.write("<span style=\"cursor:default\" class=\"f"
+                        + font + "\"" + " title=\"count: " + pair.value()
+                        + "\">" + pair.key() + "</span>\n");
+            } catch (IOException e) {
+                System.err.println("Error writing to file");
+                return;
+            }
 
         }
 
-        bufferedWriter.write("</p> </div> <body> </html>");
+        try {
+            bufferedWriter.write("</p> </div> <body> </html>");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
      /**
