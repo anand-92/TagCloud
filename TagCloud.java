@@ -105,7 +105,7 @@ public final class TagCloud {
      * </pre>
      */
     public static String nextWordOrSeparator(String text, int position,
-            Set<Character> separators) {
+            HashSet<Character> separators) {
         assert text != null : "Violation of: text is not null";
         assert separators != null : "Violation of: separators is not null";
         assert 0 <= position : "Violation of: 0 <= position";
@@ -165,10 +165,10 @@ public final class TagCloud {
      *          appears in the text file] and [n is not larger than the number
      *          of words in the file]
      */
-    private static Map<String, Integer> generateMapWithCount(
+    private static HashMap<String, Integer> generateMapWithCount(
             BufferedReader bufferedReader, int n) throws IOException {
         //Create set of separators
-        Set<Character> separators = new Set1L<>();
+        HashSet<Character> separators = new HashSet<>();
         separators.add(' ');
         separators.add(',');
         separators.add('/');
@@ -202,7 +202,7 @@ public final class TagCloud {
         separators.add(';');
         separators.add(':');
         //declare map to be generated
-        Map<String, Integer> wordCountMap = new Map1L<String, Integer>();
+        HashMap<String, Integer> wordCountMap = new HashMap<String, Integer>();
         //generate map
         int count = 0;
 
@@ -233,11 +233,11 @@ public final class TagCloud {
                 } else {
                     //store all non-separators and their respective counts in
                     //the map
-                    if (wordCountMap.hasKey(key)) {
-                        int value = wordCountMap.value(key) + 1;
-                        wordCountMap.replaceValue(key, value);
+                    if (wordCountMap.containsKey(key)) {
+                        int value = wordCountMap.get(key) + 1;
+                        wordCountMap.replace(key, value);
                     } else {
-                        wordCountMap.add(key, 1);
+                        wordCountMap.put(key, 1);
                     }
                     i += key.length();
                     count++;
