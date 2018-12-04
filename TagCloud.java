@@ -447,16 +447,14 @@ public final class TagCloud {
         }
     }
 
-     /**
+    /**
      * Main method.
      *
      * @param args
      *            the command line arguments
-     * @throws IOException
-     *             error opening or creating file
      *
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)  {
         //declare comparator objects
         Alphabetize alphabetize = new Alphabetize();
         CountComparator countCompare = new CountComparator();
@@ -488,7 +486,12 @@ public final class TagCloud {
         } catch (IOException e) {
             System.err.println("Error creating file");
             scanner.close();
-            bufferedReader.close();
+            try {
+                bufferedReader.close();
+            } catch (IOException e1) {
+                System.err.println("Error closing file");
+                return;
+            }
             return;
         }
 
@@ -498,7 +501,32 @@ public final class TagCloud {
         int n = scanner.nextInt();
 
         //generate map of all terms and their respective counts from input file
-        Map<String, Integer> bigMap = generateMapWithCount(bufferedReader, n);
+        Map<String, Integer> bigMap;
+        try {
+            bigMap = generateMapWithCount(bufferedReader, n);
+        } catch (IOException e) {
+            System.err.println("Error reading file");
+            scanner.close();
+            try {
+                bufferedReader.close();
+            } catch (IOException e1) {
+                System.err.println("Error closing input file");
+                try {
+                    bufferedWriter.close();
+                } catch (IOException e2) {
+                    System.err.println("Error closing new file");
+                    return;
+                }
+                return;
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e1) {
+                System.err.println("Error closing new file");
+                return;
+            }
+            return;
+        }
 
         //check for user error for the value of n
         boolean a = n >= 0;
@@ -528,9 +556,20 @@ public final class TagCloud {
          * Close input and output streams
          */
 
-        bufferedReader.close();
-        bufferedWriter.close();
         scanner.close();
+        try {
+            bufferedReader.close();
+        } catch (IOException e) {
+            System.err.println("Error closing file");
+            return;
+        }
+        try {
+            bufferedWriter.close();
+        } catch (IOException e) {
+            System.err.println("Error writing to file");
+            return;
+        }
+        
     }
 
 }
