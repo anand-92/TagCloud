@@ -164,6 +164,7 @@ public final class TagCloud {
      *          keys, and each key's value is the number of times that key
      *          appears in the text file] and [n is not larger than the number
      *          of words in the file]
+     *
      */
     private static HashMap<String, Integer> generateMapWithCount(
             BufferedReader bufferedReader, int n) throws IOException {
