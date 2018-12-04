@@ -1,3 +1,9 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Comparator;
 
 import components.map.Map;
@@ -12,9 +18,12 @@ import components.sortingmachine.SortingMachine;
 import components.sortingmachine.SortingMachine1L;
 
 /**
- * Put a short phrase describing the program here.
+ * Generates a Tag Cloud from a text file. The Tag Cloud lists the most frequent
+ * words in the text file in alphabetical order and changes the font size of
+ * each word based on its number of occurrences in the file. Each word's count
+ * can be seen by hovering the cursor over the word.
  *
- * @author Hudson Arledge
+ * @author Hudson Arledge and Nik Anand
  *
  */
 public final class TagCloud {
@@ -25,8 +34,15 @@ public final class TagCloud {
     private TagCloud() {
     }
 
-    private static int Min = 0;
-    private static int Max = 0;
+    /**
+     * Global integer for the minimum number of word occurrences in the file.
+     */
+    private static int min = 0;
+
+    /**
+     * Global integer for the maximum number of word occurrences in the file.
+     */
+    private static int max = 0;
 
     /**
      * A {@code Comparator}) class that compares Map.Pair<String, Integer> using
@@ -141,16 +157,20 @@ public final class TagCloud {
      * file {@code in} as keys and their number of occurrences in {@code in} as
      * values.
      *
-     * @param in
+     * @param bufferedReader
      *            the input text file from which the map is generated
+     * @param n
+     *            the number of words in the cloud tag as specified by the user
      * @return a {@code Map<String, Integer>} containing each word in {@code in}
      *         as keys and their number of occurrences in {@code in} as values
+     * @throws IOException 
      * @ensures [the returned map contains all the words in the input file as
      *          keys, and each key's value is the number of times that key
-     *          appears in the text file]
+     *          appears in the text file] and [n is not larger than the number
+     *          of words in the file]
      */
-    private static Map<String, Integer> generateMapWithCount(SimpleReader in,
-            int n) {
+    private static Map<String, Integer> generateMapWithCount(BufferedReader bufferedReader,
+            int n) throws IOException {
         //Create set of separators
         Set<Character> separators = new Set1L<>();
         separators.add(' ');
@@ -189,8 +209,8 @@ public final class TagCloud {
         Map<String, Integer> wordCountMap = new Map1L<String, Integer>();
         //generate map
         int count = 0;
-        while (!in.atEOS()) {
-            String text = in.nextLine().toLowerCase();
+        while (bufferedReader.readLine()!=null) {
+            String text = bufferedReader.readLine().toLowerCase();
             int i = 0;
             //read each word or separator in the line, and store any non-separators
             //in the queue.
@@ -232,11 +252,26 @@ public final class TagCloud {
             SimpleWriter out = new SimpleWriter1L();
             out.println(
                     "Error: n is larger than the number of words in the file");
+            out.close();
         }
         return wordCountMap;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> CountSortingMachine(
+    /**
+     * Returns a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
+     * mode containing the elements of {@code map}. The SortingMachine is
+     * ordered based on {@code c}.
+     *
+     * @param map
+     *            the map whose elements are used to create the sorting machine
+     * @param c
+     *            the ordering for the sorting machine
+     * @return a {@code SortingMachine<Map.Pair<String, Integer>>} containing
+     *         the elements of {@code map} with ordering from {@code c}
+     * @ensures [the sorting machine is in insertion mode with ordering c and it
+     *          contains all of the elements of the map]
+     */
+    private static SortingMachine<Map.Pair<String, Integer>> countSortingMachine(
             Map<String, Integer> map, CountComparator c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
                 c);
@@ -250,7 +285,22 @@ public final class TagCloud {
         return sorter;
     }
 
-    private static SortingMachine<Map.Pair<String, Integer>> AlphabeticSortingMachine(
+    /**
+     * Returns a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
+     * mode containing the elements of {@code map}. The SortingMachine is
+     * ordered based on {@code c}.
+     *
+     * @param map
+     *            the map whose elements are used to create the sorting machine
+     * @param c
+     *            the ordering for the sorting machine
+     * @return a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
+     *         mode containing the elements of {@code map} with ordering from
+     *         {@code c}
+     * @ensures [the sorting machine is in insertion mode with ordering c and it
+     *          contains all of the elements of the map]
+     */
+    private static SortingMachine<Map.Pair<String, Integer>> alphabeticSortingMachine(
             Map<String, Integer> map, Alphabetize c) {
         SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
                 c);
@@ -264,68 +314,92 @@ public final class TagCloud {
         return sorter;
     }
 
+    /**
+     * Generates and returns a {@code Map<String, Integer>} containing the first
+     * n elements of {@code sorter}.
+     *
+     * @param sorter
+     *            the sorting machine whose elements are used to make the map
+     * @param n
+     *            the number of elements to be taken from {@code sorter}
+     * @updates sorter
+     *
+     * @return a {@code Map<String, Integer>} containing the first n elements of
+     *         {@code sorter}
+     * @requires sorter is in insertion mode
+     * @ensures [the sorter is in extraction mode and only contains elements
+     *          that were not removed] and [the map being returned contains the
+     *          first n elements of the sorter in its original state]
+     */
     private static Map<String, Integer> generateShortenedMap(
             SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
 
         Map<String, Integer> map = new Map1L<String, Integer>();
         sorter.changeToExtractionMode();
-        //need max value
         Map.Pair<String, Integer> currentPair = sorter.removeFirst();
-        Max = currentPair.value();
+        max = currentPair.value();
         map.add(currentPair.key(), currentPair.value());
-        int i = 0;
+        int i = 1;
         while (i < n) {
             Map.Pair<String, Integer> pair = sorter.removeFirst();
             map.add(pair.key(), pair.value());
-            Min = pair.value();
+            min = pair.value();
             i++;
         }
         return map;
     }
+
     /**
-     * Outputs to a given file {@code out} html code that prints words from 
+     * Outputs to a given file {@code out} HTML code that prints words from
      * {@code alphaSorter} in order, adjusting the word's font size based on
-     * occurences.  
+     * occurrences and making the occurrences of a word visible by hovering it
+     * with the cursor.
      *
-     * @param out
-     *            the output text file 
+     * @param bufferedWriter
+     *            the output text file
      * @param alphaSorter
-     *            an alphabetically sorted map of words with counts
+     *            an alphabetically sorted sorting machine of words with counts
      * @param n
      *            the given number of words in cloud tag
      * @param fileName
      *            the name of the given input file
-     * @ensures that a valid html file is generated to the given output filename
+     * @throws IOException 
+     * @requires alphaSorter is in insertion mode
+     * @updates alphaSorter
+     * @ensures [a valid html file is generated to the given output filename]
+     *          and [alphaSorter is in extraction mode and has no elements]
      */
-    private static void outputTagCloud(SimpleWriter out,
+    private static void outputTagCloud(BufferedWriter bufferedWriter,
             SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
-            String fileName) {
+            String fileName) throws IOException {
 
         //output header
-        out.println("<html>");
-        out.println("<head> " + "<title> Top " + n + "words in " + fileName
+        bufferedWriter.write("<html>");
+        bufferedWriter.write("<head> " + "<title> Top " + n + "words in " + fileName
                 + "</title>");
-        out.println(
+        bufferedWriter.write(
                 "<link href=\"http://cse.osu.edu/software/2231/web-sw2/assignments/projects/tag-cloud-generator/data/tagcloud.css\" rel=\"stylesheet\" type=\"text/css\">");
-        out.println("</head>");
+        bufferedWriter.write("</head>");
 
         //output tag cloud
-        out.println("<body data-gr-c-s-loaded=\"true\">");
-        out.println("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
-        out.println("<div class = \"cdiv\"> " + "<p class =\"cbox\">");
+        bufferedWriter.write("<body data-gr-c-s-loaded=\"true\">");
+        bufferedWriter.write("<h2>Top " + n + " words in " + fileName + "</h2><hr>");
+        bufferedWriter.write("<div class = \"cdiv\"> " + "<p class =\"cbox\">");
         alphaSorter.changeToExtractionMode();
         while (alphaSorter.size() != 0) {
             Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
-            int font = (37) * (pair.value() - Min);
-            font /= (Max - Min);
-            font += 11;
-            out.println("<span style=\"cursor:default\" class=\"f" + font + "\""
+            final int a = 37;
+            int font = (a) * (pair.value() - min);
+            font /= (max - min);
+            final int b = 11;
+            font += b;
+            bufferedWriter.write("<span style=\"cursor:default\" class=\"f" + font + "\""
                     + " title=\"count: " + pair.value() + "\">" + pair.key()
                     + "</span>");
 
         }
 
-        out.println("</p> </div> <body> </html>");
+        bufferedWriter.write("</p> </div> <body> </html>");
     }
 
     /**
@@ -333,8 +407,9 @@ public final class TagCloud {
      *
      * @param args
      *            the command line arguments
+     * @throws IOException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         //declare comparator objects
         Alphabetize alphabetize = new Alphabetize();
         CountComparator countCompare = new CountComparator();
@@ -346,12 +421,16 @@ public final class TagCloud {
         //prompt user for name of input file
         out.println("Input File: ");
         String fileName = in.nextLine();
-        SimpleReader fileIn = new SimpleReader1L(fileName);
+        
+        FileReader reader = new FileReader(fileName);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+
 
         //prompt user for name of output file
         out.println("Output File: ");
         String fileNameOut = in.nextLine();
-        SimpleWriter fileOut = new SimpleWriter1L(fileNameOut);
+        FileWriter writer = new FileWriter(fileNameOut);
+        BufferedWriter bufferedWriter = new BufferedWriter(writer);
 
         //prompt user for number of words in cloud tag
         out.println("Number of words in cloud tag: ");
@@ -359,7 +438,7 @@ public final class TagCloud {
         int n = in.nextInteger();
 
         //generate map of all terms and their respective counts from input file
-        Map<String, Integer> bigMap = generateMapWithCount(fileIn, n);
+        Map<String, Integer> bigMap = generateMapWithCount(bufferedReader, n);
 
         //check for user error for the value of n
         boolean a = n >= 0;
@@ -368,7 +447,7 @@ public final class TagCloud {
         } else {
 
             //generate a sorting machine sorted by count with the big map
-            SortingMachine<Map.Pair<String, Integer>> countSorter = CountSortingMachine(
+            SortingMachine<Map.Pair<String, Integer>> countSorter = countSortingMachine(
                     bigMap, countCompare);
 
             //generate a map with n words, using up the sorting machine
@@ -378,11 +457,11 @@ public final class TagCloud {
             }
 
             //generate a sorting machine sorted alphabetically with the new map
-            SortingMachine<Map.Pair<String, Integer>> aSorter = AlphabeticSortingMachine(
+            SortingMachine<Map.Pair<String, Integer>> aSorter = alphabeticSortingMachine(
                     smallMap, alphabetize);
 
             //output HTML code for the tag cloud to the output file
-            outputTagCloud(fileOut, aSorter, n, fileName);
+            outputTagCloud(bufferedWriter, aSorter, n, fileName);
         }
 
         /*
@@ -390,8 +469,10 @@ public final class TagCloud {
          */
         in.close();
         out.close();
-        fileIn.close();
-        fileOut.close();
+        reader.close();
+        bufferedReader.close();
+        writer.close();
+        bufferedWriter.close();
     }
 
 }
