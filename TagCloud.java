@@ -256,18 +256,19 @@ public final class TagCloud {
     }
 
     /**
-     * Returns a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
-     * mode containing the elements of {@code map}. The SortingMachine is
-     * ordered based on {@code c}.
+     * Returns a {@code PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>}
+     * containing the elements of {@code map}. The PriorityQueue is ordered
+     * based on {@code c}.
      *
      * @param map
-     *            the map whose elements are used to create the sorting machine
+     *            the map whose elements are used to create the PriorityQueue
      * @param c
-     *            the ordering for the sorting machine
-     * @return a {@code SortingMachine<Map.Pair<String, Integer>>} containing
-     *         the elements of {@code map} with ordering from {@code c}
-     * @ensures [the sorting machine is in insertion mode with ordering c and it
-     *          contains all of the elements of the map]
+     *            the ordering for the PriorityQueue
+     * @return a {@code PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>}
+     *         containing the elements of {@code map} with ordering from
+     *         {@code c}
+     * @ensures [the PriorityQueue is in ordering c and it contains all of the
+     *          elements of the map]
      */
     private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countPQueue(
             AbstractMap<String, Integer> map, CountComparator c) {
@@ -286,19 +287,19 @@ public final class TagCloud {
     }
 
     /**
-     * Returns a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
-     * mode containing the elements of {@code map}. The SortingMachine is
-     * ordered based on {@code c}.
+     * Returns a {@code PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>}
+     * containing the elements of {@code map}. The PriorityQueue is ordered
+     * based on {@code c}.
      *
      * @param map
-     *            the map whose elements are used to create the sorting machine
+     *            the map whose elements are used to create the PriorityQueue
      * @param c
-     *            the ordering for the sorting machine
-     * @return a {@code SortingMachine<Map.Pair<String, Integer>>} in insertion
-     *         mode containing the elements of {@code map} with ordering from
+     *            the ordering for the PriorityQueue
+     * @return a {@code PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>}
+     *         containing the elements of {@code map} with ordering from
      *         {@code c}
-     * @ensures [the sorting machine is in insertion mode with ordering c and it
-     *          contains all of the elements of the map]
+     * @ensures [the sorting machine is in ordering c and it contains all of the
+     *          elements of the map]
      */
     private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphaPQueue(
             AbstractMap<String, Integer> map, Alphabetize c) {
@@ -317,20 +318,22 @@ public final class TagCloud {
     }
 
     /**
-     * Generates and returns a {@code Map<String, Integer>} containing the first
-     * n elements of {@code sorter}.
+     * Generates and returns a {@code AbstractMap<String, Integer>} containing
+     * the first n elements of {@code sorter}.
      *
      * @param sorter
-     *            the sorting machine whose elements are used to make the map
+     *            the PriorityQueue whose elements are used to make the
+     *            AbstractMap
      * @param n
      *            the number of elements to be taken from {@code sorter}
      * @updates sorter
      *
-     * @return a {@code Map<String, Integer>} containing the first n elements of
-     *         {@code sorter} @requires|sorter| > 0 and n <= |sorter|
-     * @ensures [the sorter is in extraction mode and only contains elements
-     *          that were not removed] and [the map being returned contains the
-     *          first n elements of the sorter in its original state]
+     * @return a {@code AbstractMap<String, Integer>} containing the first n
+     *         elements of {@code sorter} @requires|sorter| > 0 and n <=
+     *         |sorter|
+     * @ensures [the sorter only contains elements that were not removed] and
+     *          [the AbstractMap being returned contains the first n elements of
+     *          the sorter in its original state]
      */
     private static AbstractMap<String, Integer> generateShortenedMap(
             PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter,
@@ -357,14 +360,13 @@ public final class TagCloud {
      * with the cursor.
      *
      * @param bufferedWriter
-     *            the output text file
+     *            the output stream to the HTML file
      * @param alphaSorter
      *            an alphabetically sorted sorting machine of words with counts
      * @param n
      *            the given number of words in cloud tag
      * @param fileName
      *            the name of the given input file
-     * @requires alphaSorter is in insertion mode
      * @updates alphaSorter
      * @ensures [a valid html file is generated to the given output filename]
      *          and [alphaSorter is in extraction mode and has no elements]
