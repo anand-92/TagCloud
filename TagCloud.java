@@ -1,17 +1,16 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Scanner;
-
-import components.map.Map;
-import components.map.Map1L;
-import components.set.Set;
-import components.set.Set1L;
-import components.sortingmachine.SortingMachine;
-import components.sortingmachine.SortingMachine1L;
 
 /**
  * Generates a Tag Cloud from a text file. The Tag Cloud lists the most frequent
@@ -48,11 +47,11 @@ public final class TagCloud {
      *
      */
     private static class Alphabetize
-            implements Comparator<Map.Pair<String, Integer>> {
+            implements Comparator<AbstractMap.SimpleEntry<String, Integer>> {
         @Override
-        public int compare(Map.Pair<String, Integer> o1,
-                Map.Pair<String, Integer> o2) {
-            return o1.key().compareTo(o2.key());
+        public int compare(AbstractMap.SimpleEntry<String, Integer> o1,
+                AbstractMap.SimpleEntry<String, Integer> o2) {
+            return o1.getKey().compareTo(o2.getKey());
         }
     }
 
@@ -64,11 +63,11 @@ public final class TagCloud {
      *
      */
     private static class CountComparator
-            implements Comparator<Map.Pair<String, Integer>> {
+            implements Comparator<AbstractMap.SimpleEntry<String, Integer>> {
         @Override
-        public int compare(Map.Pair<String, Integer> o1,
-                Map.Pair<String, Integer> o2) {
-            return o2.value().compareTo(o1.value());
+        public int compare(AbstractMap.SimpleEntry<String, Integer> o1,
+                AbstractMap.SimpleEntry<String, Integer> o2) {
+            return o2.getValue().compareTo(o1.getValue());
         }
     }
 
@@ -164,10 +163,9 @@ public final class TagCloud {
      *          keys, and each key's value is the number of times that key
      *          appears in the text file] and [n is not larger than the number
      *          of words in the file]
-     *
      */
-    private static HashMap<String, Integer> generateMapWithCount(
-            BufferedReader bufferedReader, int n) throws IOException {
+    private static AbstractMap<String, Integer> generateMapWithCount(
+            BufferedReader bufferedReader, int n) {
         //Create set of separators
         HashSet<Character> separators = new HashSet<>();
         separators.add(' ');
@@ -206,7 +204,6 @@ public final class TagCloud {
         HashMap<String, Integer> wordCountMap = new HashMap<String, Integer>();
         //generate map
         int count = 0;
-
         try {
             while (bufferedReader.ready()) {
                 String text = bufferedReader.readLine().toLowerCase();
@@ -235,11 +232,11 @@ public final class TagCloud {
                     } else {
                         //store all non-separators and their respective counts in
                         //the map
-                        if (wordCountMap.hasKey(key)) {
-                            int value = wordCountMap.value(key) + 1;
-                            wordCountMap.replaceValue(key, value);
+                        if (wordCountMap.containsKey(key)) {
+                            int value = wordCountMap.get(key) + 1;
+                            wordCountMap.replace(key, value);
                         } else {
-                            wordCountMap.add(key, 1);
+                            wordCountMap.put(key, 1);
                         }
                         i += key.length();
                         count++;
@@ -272,17 +269,18 @@ public final class TagCloud {
      * @ensures [the sorting machine is in insertion mode with ordering c and it
      *          contains all of the elements of the map]
      */
-    private static SortingMachine<Map.Pair<String, Integer>> countSortingMachine(
-            Map<String, Integer> map, CountComparator c) {
-        SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
+    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countPriorityQueue(
+            AbstractMap<String, Integer> map, CountComparator c) {
+        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(
                 c);
-        Map<String, Integer> temp = map.newInstance();
-        while (map.size() > 0) {
-            Map.Pair<String, Integer> pair = map.removeAny();
+
+        Iterator<String> iter = map.keySet().iterator();
+        while (iter.hasNext()) {
+            String key = iter.next();
+            AbstractMap.SimpleEntry<String, Integer> pair = new AbstractMap.SimpleEntry<String, Integer>(
+                    key, map.get(key));
             sorter.add(pair);
-            temp.add(pair.key(), pair.value());
         }
-        map.transferFrom(temp);
         return sorter;
     }
 
@@ -301,17 +299,18 @@ public final class TagCloud {
      * @ensures [the sorting machine is in insertion mode with ordering c and it
      *          contains all of the elements of the map]
      */
-    private static SortingMachine<Map.Pair<String, Integer>> alphabeticSortingMachine(
-            Map<String, Integer> map, Alphabetize c) {
-        SortingMachine<Map.Pair<String, Integer>> sorter = new SortingMachine1L<Map.Pair<String, Integer>>(
+    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphabeticPriorityQueue(
+            AbstractMap<String, Integer> map, Alphabetize c) {
+        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(
                 c);
-        Map<String, Integer> temp = map.newInstance();
-        while (map.size() > 0) {
-            Map.Pair<String, Integer> pair = map.removeAny();
+
+        Iterator<String> iter = map.keySet().iterator();
+        while (iter.hasNext()) {
+            String key = iter.next();
+            AbstractMap.SimpleEntry<String, Integer> pair = new AbstractMap.SimpleEntry<String, Integer>(
+                    key, map.get(key));
             sorter.add(pair);
-            temp.add(pair.key(), pair.value());
         }
-        map.transferFrom(temp);
         return sorter;
     }
 
@@ -332,19 +331,19 @@ public final class TagCloud {
      *          that were not removed] and [the map being returned contains the
      *          first n elements of the sorter in its original state]
      */
-    private static Map<String, Integer> generateShortenedMap(
-            SortingMachine<Map.Pair<String, Integer>> sorter, int n) {
+    private static AbstractMap<String, Integer> generateShortenedMap(
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter,
+            int n) {
 
-        Map<String, Integer> map = new Map1L<String, Integer>();
-        sorter.changeToExtractionMode();
-        Map.Pair<String, Integer> currentPair = sorter.removeFirst();
-        max = currentPair.value();
-        map.add(currentPair.key(), currentPair.value());
+        AbstractMap<String, Integer> map = new HashMap<String, Integer>();
+        AbstractMap.SimpleEntry<String, Integer> currentPair = sorter.poll();
+        max = currentPair.getValue();
+        map.put(currentPair.getKey(), currentPair.getValue());
         int i = 1;
         while (i < n) {
-            Map.Pair<String, Integer> pair = sorter.removeFirst();
-            map.add(pair.key(), pair.value());
-            min = pair.value();
+            AbstractMap.SimpleEntry<String, Integer> pair = sorter.poll();
+            map.put(pair.getKey(), pair.getValue());
+            min = pair.getValue();
             i++;
         }
         return map;
@@ -370,8 +369,8 @@ public final class TagCloud {
      *          and [alphaSorter is in extraction mode and has no elements]
      */
     private static void outputTagCloud(BufferedWriter bufferedWriter,
-            SortingMachine<Map.Pair<String, Integer>> alphaSorter, int n,
-            String fileName) {
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphaSorter,
+            int n, String fileName) {
 
         //output header
         try {
@@ -424,18 +423,17 @@ public final class TagCloud {
             System.err.println("Error writing to file");
             return;
         }
-        alphaSorter.changeToExtractionMode();
-        while (alphaSorter.size() != 0) {
-            Map.Pair<String, Integer> pair = alphaSorter.removeFirst();
+        while (alphaSorter.size() > 0) {
+            AbstractMap.SimpleEntry<String, Integer> pair = alphaSorter.poll();
             final int a = 37;
-            int font = (a) * (pair.value() - min);
+            int font = (a) * (pair.getValue() - min);
             font /= (max - min);
             final int b = 11;
             font += b;
             try {
                 bufferedWriter.write("<span style=\"cursor:default\" class=\"f"
-                        + font + "\"" + " title=\"count: " + pair.value()
-                        + "\">" + pair.key() + "</span>\n");
+                        + font + "\"" + " title=\"count: " + pair.getValue()
+                        + "\">" + pair.getKey() + "</span>\n");
             } catch (IOException e) {
                 System.err.println("Error writing to file");
                 return;
@@ -458,7 +456,7 @@ public final class TagCloud {
      *            the command line arguments
      *
      */
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
         //declare comparator objects
         Alphabetize alphabetize = new Alphabetize();
         CountComparator countCompare = new CountComparator();
@@ -505,9 +503,9 @@ public final class TagCloud {
         int n = scanner.nextInt();
 
         //generate map of all terms and their respective counts from input file
-        Map<String, Integer> bigMap;
-        
-        bigMap = generateMapWithCount(bufferedReader, n);
+
+        AbstractMap<String, Integer> bigMap = generateMapWithCount(
+                bufferedReader, n);
         if (bigMap == null) {
             scanner.close();
             try {
@@ -526,17 +524,17 @@ public final class TagCloud {
         } else {
 
             //generate a sorting machine sorted by count with the big map
-            SortingMachine<Map.Pair<String, Integer>> countSorter = countSortingMachine(
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countSorter = countPriorityQueue(
                     bigMap, countCompare);
 
             //generate a map with n words, using up the sorting machine
-            Map<String, Integer> smallMap = bigMap.newInstance();
+            AbstractMap<String, Integer> smallMap = new HashMap<String, Integer>();
             if (bigMap.size() > 0) {
                 smallMap = generateShortenedMap(countSorter, n);
             }
 
             //generate a sorting machine sorted alphabetically with the new map
-            SortingMachine<Map.Pair<String, Integer>> aSorter = alphabeticSortingMachine(
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> aSorter = alphabeticPriorityQueue(
                     smallMap, alphabetize);
 
             //output HTML code for the tag cloud to the output file
@@ -560,7 +558,7 @@ public final class TagCloud {
             System.err.println("Error writing to file");
             return;
         }
-        
+
     }
 
 }
