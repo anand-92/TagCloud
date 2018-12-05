@@ -299,7 +299,7 @@ public final class TagCloud {
      * @return a {@code PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>}
      *         containing the elements of {@code map} with ordering from
      *         {@code c}
-     * @ensures [the sorting machine is in ordering c and it contains all of the
+     * @ensures [the alphaQueue is in ordering c and it contains all of the
      *          elements of the map]
      */
     private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphaPQueue(
@@ -329,9 +329,9 @@ public final class TagCloud {
      *            the number of elements to be taken from {@code sorter}
      * @updates sorter
      *
-     * @ensures [the sorter only contains elements that were not removed] and
-     *          [the AbstractMap being returned contains the first n elements of
-     *          the sorter in its original state]
+     * @ensures [the PriorityQueue only contains elements that were not removed]
+     *          and [the AbstractMap being returned contains the first n
+     *          elements of the sorter in its original state]
      * @requires |sorter| > 0 and n <= |sorter|
      * @return a {@code AbstractMap<String, Integer>} containing the first n
      *         elements of {@code sorter}
@@ -363,14 +363,14 @@ public final class TagCloud {
      * @param bufferedWriter
      *            the output stream to the HTML file
      * @param alphaSorter
-     *            an alphabetically sorted sorting machine of words with counts
+     *            an alphabetically sorted PriorityQueue of words with counts
      * @param n
      *            the given number of words in cloud tag
      * @param fileName
      *            the name of the given input file
      * @updates alphaSorter
      * @ensures [a valid html file is generated to the given output filename]
-     *          and [alphaSorter is in extraction mode and has no elements]
+     *          and [alphaSorter has no elements]
      */
     private static void outputTagCloud(BufferedWriter bufferedWriter,
             PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphaSorter,
@@ -527,17 +527,17 @@ public final class TagCloud {
             System.out.println("Error: n is negative.");
         } else {
 
-            //generate a sorting machine sorted by count with the big map
+            //generate a PriorityQueue sorted by count with the big map
             PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countSorter;
             countSorter = countPQueue(bigMap, countCompare);
 
-            //generate a map with n words, using up the sorting machine
+            //generate a map with n words, using up the PriorityQueue
             AbstractMap<String, Integer> smallMap = new HashMap<String, Integer>();
             if (countSorter.size() > 0) {
                 smallMap = generateShortenedMap(countSorter, n);
             }
 
-            //generate a sorting machine sorted alphabetically with the new map
+            //generate a PriorityQueue sorted alphabetically with the new map
             PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> aSorter = alphaPQueue(
                     smallMap, alphabetize);
 
