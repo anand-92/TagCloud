@@ -39,7 +39,7 @@ public final class TagCloud {
      */
     private static int max = 0;
 
-     /**
+    /**
      * A {@code Comparator}) class that compares AbstractMap.SimpleEntry<String,
      * Integer> using the {@code compareTo(String)}) java.util method.
      *
@@ -329,12 +329,12 @@ public final class TagCloud {
      *            the number of elements to be taken from {@code sorter}
      * @updates sorter
      *
-     * @return a {@code AbstractMap<String, Integer>} containing the first n
-     *         elements of {@code sorter} 
-     * @requires|sorter| > 0 and n <=|sorter|
      * @ensures [the sorter only contains elements that were not removed] and
      *          [the AbstractMap being returned contains the first n elements of
      *          the sorter in its original state]
+     * @requires |sorter| > 0 and n <= |sorter|
+     * @return a {@code AbstractMap<String, Integer>} containing the first n
+     *         elements of {@code sorter}
      */
     private static AbstractMap<String, Integer> generateShortenedMap(
             PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter,
