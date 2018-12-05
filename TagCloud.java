@@ -269,16 +269,17 @@ public final class TagCloud {
      * @ensures [the sorting machine is in insertion mode with ordering c and it
      *          contains all of the elements of the map]
      */
-    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countPriorityQueue(
+    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countPQueue(
             AbstractMap<String, Integer> map, CountComparator c) {
-        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(
-                c);
+        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter;
+        sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(c);
 
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
-            AbstractMap.SimpleEntry<String, Integer> pair = new AbstractMap.SimpleEntry<String, Integer>(
-                    key, map.get(key));
+            AbstractMap.SimpleEntry<String, Integer> pair;
+            pair = new AbstractMap.SimpleEntry<String, Integer>(key,
+                    map.get(key));
             sorter.add(pair);
         }
         return sorter;
@@ -299,16 +300,17 @@ public final class TagCloud {
      * @ensures [the sorting machine is in insertion mode with ordering c and it
      *          contains all of the elements of the map]
      */
-    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphabeticPriorityQueue(
+    private static PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> alphaPQueue(
             AbstractMap<String, Integer> map, Alphabetize c) {
-        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(
-                c);
+        PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> sorter;
+        sorter = new PriorityQueue<AbstractMap.SimpleEntry<String, Integer>>(c);
 
         Iterator<String> iter = map.keySet().iterator();
         while (iter.hasNext()) {
             String key = iter.next();
-            AbstractMap.SimpleEntry<String, Integer> pair = new AbstractMap.SimpleEntry<String, Integer>(
-                    key, map.get(key));
+            AbstractMap.SimpleEntry<String, Integer> pair;
+            pair = new AbstractMap.SimpleEntry<String, Integer>(key,
+                    map.get(key));
             sorter.add(pair);
         }
         return sorter;
@@ -325,8 +327,7 @@ public final class TagCloud {
      * @updates sorter
      *
      * @return a {@code Map<String, Integer>} containing the first n elements of
-     *         {@code sorter}
-     * @requires sorter is in insertion mode
+     *         {@code sorter} @requires|sorter| > 0 and n <= |sorter|
      * @ensures [the sorter is in extraction mode and only contains elements
      *          that were not removed] and [the map being returned contains the
      *          first n elements of the sorter in its original state]
@@ -524,17 +525,17 @@ public final class TagCloud {
         } else {
 
             //generate a sorting machine sorted by count with the big map
-            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countSorter = countPriorityQueue(
-                    bigMap, countCompare);
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> countSorter;
+            countSorter = countPQueue(bigMap, countCompare);
 
             //generate a map with n words, using up the sorting machine
             AbstractMap<String, Integer> smallMap = new HashMap<String, Integer>();
-            if (bigMap.size() > 0) {
+            if (countSorter.size() > 0) {
                 smallMap = generateShortenedMap(countSorter, n);
             }
 
             //generate a sorting machine sorted alphabetically with the new map
-            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> aSorter = alphabeticPriorityQueue(
+            PriorityQueue<AbstractMap.SimpleEntry<String, Integer>> aSorter = alphaPQueue(
                     smallMap, alphabetize);
 
             //output HTML code for the tag cloud to the output file
