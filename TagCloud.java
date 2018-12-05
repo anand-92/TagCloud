@@ -39,9 +39,9 @@ public final class TagCloud {
      */
     private static int max = 0;
 
-    /**
-     * A {@code Comparator}) class that compares Map.Pair<String, Integer> using
-     * the {@code compareTo(String)}) java.util method.
+     /**
+     * A {@code Comparator}) class that compares AbstractMap.SimpleEntry<String,
+     * Integer> using the {@code compareTo(String)}) java.util method.
      *
      * @author Hudson Arledge and Nik Anand
      *
@@ -56,8 +56,8 @@ public final class TagCloud {
     }
 
     /**
-     * A {@code Comparator}) class that compares Map.Pair<String, Integer> using
-     * the {@code compareTo(Integer)}) java.util method.
+     * A {@code Comparator}) class that compares AbstractMap.SimpleEntry<String,
+     * Integer> using the {@code compareTo(Integer)}) java.util method.
      *
      * @author Hudson Arledge and Nik Anand
      *
@@ -83,7 +83,7 @@ public final class TagCloud {
      * @param position
      *            the starting index
      * @param separators
-     *            the {@code Set} of separator characters
+     *            the {@code HashSet} of separator characters
      * @return the first word or separator string found in {@code text} starting
      *         at index {@code position}
      * @requires 0 <= position < |text|
@@ -153,12 +153,13 @@ public final class TagCloud {
      * values.
      *
      * @param bufferedReader
-     *            the input text file from which the map is generated
+     *            the input stream to the text file from which the map is
+     *            generated
      * @param n
      *            the number of words in the cloud tag as specified by the user
-     * @return a {@code Map<String, Integer>} containing each word in {@code in}
-     *         as keys and their number of occurrences in {@code in} as values
-     * @throws IOException
+     * @return a {@code AbstractMap<String, Integer>} containing each word in
+     *         {@code in} as keys and their number of occurrences in {@code in}
+     *         as values
      * @ensures [the returned map contains all the words in the input file as
      *          keys, and each key's value is the number of times that key
      *          appears in the text file] and [n is not larger than the number
@@ -201,7 +202,7 @@ public final class TagCloud {
         separators.add(';');
         separators.add(':');
         //declare map to be generated
-        HashMap<String, Integer> wordCountMap = new HashMap<String, Integer>();
+        AbstractMap<String, Integer> wordCountMap = new HashMap<String, Integer>();
         //generate map
         int count = 0;
         try {
