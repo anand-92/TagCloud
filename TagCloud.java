@@ -330,8 +330,8 @@ public final class TagCloud {
      * @updates sorter
      *
      * @return a {@code AbstractMap<String, Integer>} containing the first n
-     *         elements of {@code sorter} @requires|sorter| > 0 and n <=
-     *         |sorter|
+     *         elements of {@code sorter} 
+     * @requires|sorter| > 0 and n <=|sorter|
      * @ensures [the sorter only contains elements that were not removed] and
      *          [the AbstractMap being returned contains the first n elements of
      *          the sorter in its original state]
